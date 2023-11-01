@@ -29,4 +29,4 @@ async def get_hotel(
     location, services, rooms_quantity, image_id, rooms_left 
     (количество оставшихся номеров).
     '''
-    return await HotelsDAO.find_all()
+    return await HotelsDAO.find_all(location, date_from, date_to)
