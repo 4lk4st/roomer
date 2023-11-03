@@ -1,6 +1,6 @@
 from datetime import date, timedelta
 
-from sqlalchemy import and_, func, select
+from sqlalchemy import and_, case, func, select, values
 from app.bookings.models import Bookings
 
 from app.dao.base import BaseDAO
@@ -24,7 +24,6 @@ class RoomsDAO(BaseDAO):
             SELECT bookings.room_id, COUNT(bookings.id) AS booking_count
             FROM bookings
             LEFT JOIN rooms ON bookings.room_id = rooms.id
-            WHERE hotel_id = $hotel_id
             AND date_from <= '$date_to' AND date_to >= '$date_from'
             GROUP BY bookings.room_id
         )
@@ -33,7 +32,8 @@ class RoomsDAO(BaseDAO):
             (rooms.quantity - COALESCE(rooms_booked.booking_count, 0))
                 AS rooms_left
         FROM rooms
-        LEFT JOIN rooms_booked ON rooms.id = rooms_booked.room_id       
+        LEFT JOIN rooms_booked ON rooms.id = rooms_booked.room_id
+        WHERE hotel_id = $hotel_id     
         """
 
         total_days = (date_to - date_from).days
@@ -46,22 +46,26 @@ class RoomsDAO(BaseDAO):
                 .select_from(Bookings)
                 .join(Rooms, Bookings.room_id == Rooms.id, isouter=True)
                 .where(
-                    and_(Rooms.hotel_id == hotel_id,
-                         Bookings.date_from <= date_to,
+                    and_(Bookings.date_from <= date_to,
                          Bookings.date_to >= date_from))
                 .group_by(Bookings.room_id)
                 .cte("rooms_booked"))
 
             query = (
-                select(Rooms,
+                select(Rooms.__table__.columns,
                        (total_days * Rooms.price).label("total_cost"),
-                       (Rooms.quantity
-                        - func.coalesce(rooms_booked.c.booking_count, 0))
+                       func.coalesce(
+                           case(
+                               ((Rooms.quantity - func.coalesce(rooms_booked.c.booking_count, 0)) < 0, None),
+                               else_ = (Rooms.quantity - func.coalesce(rooms_booked.c.booking_count, 0))
+                           ), 0)
                        .label("rooms_left"))
                        .select_from(Rooms)
                        .join(rooms_booked,
                              Rooms.id == rooms_booked.c.room_id,
-                             isouter=True))
+                             isouter=True)
+                       .where(Rooms.hotel_id == hotel_id,))
+
 
             result = await session.execute(query)
             return result.mappings().all()
