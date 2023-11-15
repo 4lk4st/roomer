@@ -1,5 +1,5 @@
 from sqlalchemy import JSON, Column, Integer, String
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.database import Base
 
 class Hotels(Base):
@@ -11,3 +11,8 @@ class Hotels(Base):
     services: Mapped[list[str] | None] = mapped_column(JSON)
     rooms_quantity: Mapped[int]
     image_id: Mapped[int]
+
+    rooms: Mapped[list["Rooms"]] = relationship(back_populates="hotel")
+
+    def __str__(self) -> str:
+        return f"Отель {self.name}"
