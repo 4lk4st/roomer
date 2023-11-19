@@ -1,11 +1,12 @@
 from datetime import date, timedelta
+from fastapi.encoders import jsonable_encoder
 
 from sqlalchemy import and_, case, func, select, values
+from sqlalchemy.orm import selectinload
 from app.bookings.models import Bookings
 
 from app.dao.base import BaseDAO
 from app.database import async_session_maker, engine
-from app.hotels.models import Hotels
 from app.hotels.rooms.models import Rooms
 
 
@@ -69,3 +70,18 @@ class RoomsDAO(BaseDAO):
 
             result = await session.execute(query)
             return result.mappings().all()
+
+    @classmethod
+    async def all_rooms_with_addinfo(cls):
+        async with async_session_maker() as session:
+            query = (
+                select(Rooms)
+                .options(selectinload(Rooms.hotel))
+                .options(selectinload(Rooms.bookings))
+            )
+
+            result = await session.execute(query)
+            result = result.scalars().all()
+            result = jsonable_encoder(result)
+            
+            return result
