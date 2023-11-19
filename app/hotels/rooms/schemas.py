@@ -1,6 +1,9 @@
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 from pydantic import BaseModel
+from app.bookings.models import Bookings
+
+from app.hotels.models import Hotels
 
 
 class SRoom(BaseModel):
