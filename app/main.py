@@ -10,7 +10,7 @@ from fastapi_cache.decorator import cache
 
 from redis import asyncio as aioredis
 
-from sqladmin import Admin, ModelView
+from sqladmin import Admin
 from app.admin.views import BookingsAdmin, HotelsAdmin, RoomsAdmin, UsersAdmin
 
 from app.config import settings
