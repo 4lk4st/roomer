@@ -47,3 +47,7 @@ class RoomCannotBeBooked(BookingException):
 class RoomCannotBeDelete(BookingException):
     status_code=status.HTTP_400_BAD_REQUEST
     detail="You cannot delete a non-existent booking"
+
+class HotelsCannotBeBooked(BookingException):
+    status_code=status.HTTP_400_BAD_REQUEST
+    detail="Incorrect relation between DATE FROM and DATE TO"

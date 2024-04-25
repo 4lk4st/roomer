@@ -1,13 +1,10 @@
-import asyncio
-from datetime import date
+from datetime import date, timedelta
 from typing import Optional
-from fastapi import APIRouter, Depends, Query
-from fastapi_cache.decorator import cache
+from fastapi import APIRouter, Query
+from app.exceptions import HotelsCannotBeBooked
 
 from app.hotels.dao import HotelsDAO
 from app.hotels.schemas import SHotel, SHotelInfo
-from app.users.dependencies import get_current_user
-from app.hotels.rooms.dao import RoomsDAO
 
 
 router = APIRouter(
@@ -16,13 +13,13 @@ router = APIRouter(
 )
 
 @router.get("/{location}")
-@cache(expire=60)
 async def get_hotel(
     location: str,
     date_from: date = Query(..., description="Например, '2023-05-15'"),
     date_to: date = Query(..., description="Например, '2023-06-20'")
 ) -> list[SHotelInfo]:
-    await asyncio.sleep(1)
+    if date_from >= date_to or (date_to - date_from) > timedelta(days=30):
+        raise HotelsCannotBeBooked
     return await HotelsDAO.find_all(location, date_from, date_to)
 
 @router.get("/id/{hotel_id}")
