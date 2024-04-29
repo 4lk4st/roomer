@@ -50,3 +50,22 @@ async def test_add_and_get_booking(
     response = await authenticated_ac.get("/bookings")
 
     assert len(response.json()) == booked_rooms
+    
+async def test_crud_booking(
+    authenticated_ac: AsyncClient,
+    date_from,
+    date_to
+):
+    booking_id = await authenticated_ac.post("/bookings", params={
+        "room_id": 1,
+        "date_from": "2025-01-01",
+        "date_to": "2025-01-05",
+    })
+    
+    assertIsInstance(booking_id, int)
+    
+    get_booking_response = await authenticated_ac.get(f"/bookings/{booking_id}")
+    
+    
+    
+    assert 
