@@ -66,6 +66,6 @@ async def test_crud_booking(
     
     get_booking_response = await authenticated_ac.get(f"/bookings/{booking_id}")
     
+    assert get_booking_responce.status_code == 200
     
     
-    assert 
