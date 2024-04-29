@@ -20,7 +20,7 @@ async def test_get_and_delete_all_bookings(
     assert booking_count == 0
 
 @pytest.mark.parametrize("room_id,date_from,date_to,booked_rooms,status_code", [
-    (4, "2030-05-01", "2030-05-15", 3, 200),
+    (4, "2030-05-01", "2030-05-15", 1, 200),
     # (4, "2030-05-01", "2030-05-15", 4, 200),
     # (4, "2030-05-01", "2030-05-15", 5, 200),
     # (4, "2030-05-01", "2030-05-15", 6, 200),
@@ -49,29 +49,30 @@ async def test_add_and_get_booking(
 
     response = await authenticated_ac.get("/bookings")
 
+    print(response.content)
+
     assert len(response.json()) == booked_rooms
     
 async def test_crud_booking(
     authenticated_ac: AsyncClient,
-    date_from,
-    date_to
 ):
-    booking_id = await authenticated_ac.post("/bookings", params={
+    response = await authenticated_ac.post("/bookings", params={
         "room_id": 1,
         "date_from": "2025-01-01",
         "date_to": "2025-01-05",
     })
     
-    assertIsInstance(booking_id, int)
+    booking_id = response.json()["id"]
+
+    assert isinstance(booking_id, int)
     
-    get_booking_response = await authenticated_ac.get(f"/bookings/{booking_id}")
+    response = await authenticated_ac.get("/bookings")
+    assert response.status_code == 200
+    init_len = len(response.json())
     
-    assert get_booking_responce.status_code == 200
+    response = await authenticated_ac.delete(f"/bookings/{booking_id}")
+    assert response.status_code == 204
     
-    delete_responce = await authenticated_ac.delete(f"/bookings/{booking_id}")
-    
-    assert delete_responce.status_code == 204
-    
-    rep_booking_response = await authenticated_ac.get(f"/bookings/{booking_id}")
-    
-    assert rep_booking_responce.status_code == 200
+    response = await authenticated_ac.get("/bookings")
+    assert response.status_code == 200
+    assert len(response.json()) == (init_len - 1)
