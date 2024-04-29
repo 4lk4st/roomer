@@ -68,4 +68,10 @@ async def test_crud_booking(
     
     assert get_booking_responce.status_code == 200
     
+    delete_responce = await authenticated_ac.delete(f"/bookings/{booking_id}")
     
+    assert delete_responce.status_code == 204
+    
+    rep_booking_response = await authenticated_ac.get(f"/bookings/{booking_id}")
+    
+    assert rep_booking_responce.status_code == 200
