@@ -1,4 +1,5 @@
 from datetime import date
+
 from fastapi import APIRouter, BackgroundTasks, Depends, status
 from pydantic import TypeAdapter
 
@@ -8,7 +9,6 @@ from app.exceptions import RoomCannotBeBooked, RoomCannotBeDelete
 from app.tasks.tasks import send_booking_congirmation_email
 from app.users.dependencies import get_current_user
 from app.users.models import Users
-
 
 router = APIRouter(
     prefix="/bookings",

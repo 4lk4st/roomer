@@ -1,4 +1,3 @@
-from sqladmin import Admin
 from sqladmin.authentication import AuthenticationBackend
 from starlette.requests import Request
 from starlette.responses import RedirectResponse
@@ -25,7 +24,7 @@ class AdminAuth(AuthenticationBackend):
 
     async def authenticate(self, request: Request) -> bool:
         token = request.session.get("token")
-        
+
         if not token:
             return RedirectResponse(
                 request.url_for("admin:login"), status_code=302

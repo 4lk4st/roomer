@@ -1,8 +1,10 @@
 from datetime import date
+
 from sqlalchemy import and_, func, insert, select
+
 from app.bookings.models import Bookings
 from app.dao.base import BaseDAO
-from app.database import async_session_maker, engine
+from app.database import async_session_maker
 from app.hotels.rooms.models import Rooms
 
 
@@ -23,7 +25,7 @@ class BookingDAO(BaseDAO):
             WHERE room_id = 1 AND
             (date_from <= '2023-06-20' AND date_to >= '2023-05-15')
         )
-        SELECT rooms.quantity - COUNT(booked_rooms.room_id) AS free_rooms 
+        SELECT rooms.quantity - COUNT(booked_rooms.room_id) AS free_rooms
         FROM rooms
         LEFT JOIN booked_rooms ON booked_rooms.room_id = rooms.id
         WHERE rooms.id = 1
@@ -55,7 +57,7 @@ class BookingDAO(BaseDAO):
                 .where(Rooms.id == room_id)
                 .group_by(Rooms.quantity, booked_rooms.c.room_id)
             )
-            
+
             rooms_left = await session.execute(get_rooms_left)
             rooms_left: int = rooms_left.scalar()
 
@@ -81,7 +83,7 @@ class BookingDAO(BaseDAO):
 
             else:
                 return None
-    
+
     @classmethod
     async def find_all(cls, user_id: int):
         async with async_session_maker() as session:
@@ -99,9 +101,10 @@ class BookingDAO(BaseDAO):
                     Rooms.description,
                     Rooms.services
                 )
-            .select_from(Bookings)
-            .join(Rooms, Bookings.room_id == Rooms.id)
-            .where(Bookings.user_id == user_id))
+                .select_from(Bookings)
+                .join(Rooms, Bookings.room_id == Rooms.id)
+                .where(Bookings.user_id == user_id)
+            )
 
             result = await session.execute(query)
             return result.mappings().all()
