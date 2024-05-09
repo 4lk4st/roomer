@@ -1,6 +1,7 @@
-from datetime import date
+import datetime
+import time
 
-from fastapi import FastAPI, Query, Depends
+from fastapi import FastAPI, Query, Depends, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -26,6 +27,8 @@ from app.pages.router import router as router_pages
 from app.images.router import router as router_images
 
 from app.database import engine
+
+from app.logger import logger
 
 app = FastAPI()
 
@@ -70,3 +73,14 @@ admin.add_view(UsersAdmin)
 admin.add_view(BookingsAdmin)
 admin.add_view(HotelsAdmin)
 admin.add_view(RoomsAdmin)
+
+@app.middleware("http")
+async def add_process_time_header(request: Request, call_next):
+    start_time = time.time()
+    response = await call_next(request)
+    process_time = time.time() - start_time
+    response.headers["X-Process-Time"] = str(process_time)
+    logger.info("Request execution time", extra={
+        "process_time": round(process_time, 4)
+    })
+    return response
