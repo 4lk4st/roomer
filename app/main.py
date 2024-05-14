@@ -19,9 +19,10 @@ from app.database import engine
 from app.hotels.rooms.router import router as router_rooms
 from app.hotels.router import router as router_hotels
 from app.images.router import router as router_images
-from app.logger import logger
 from app.pages.router import router as router_pages
 from app.users.router import router as router_users
+from app.importer.router import router as router_imports
+from app.logger import logger
 
 
 sentry_sdk.init(
@@ -39,6 +40,7 @@ app.include_router(router_rooms)
 
 app.include_router(router_pages)
 app.include_router(router_images)
+app.include_router(router_imports)
 
 origins = [
     "http://localhost:3000",
