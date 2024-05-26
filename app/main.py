@@ -3,6 +3,7 @@ import time
 import sentry_sdk
 from redis import asyncio as aioredis
 from sqladmin import Admin
+from prometheus_fastapi_instrumentator import Instrumentator
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -90,10 +91,14 @@ async def add_process_time_header(request: Request, call_next):
     response = await call_next(request)
     process_time = time.time() - start_time
     response.headers["X-Process-Time"] = str(process_time)
-    logger.info("Request execution time", extra={
-        "process_time": round(process_time, 4)
-    })
+    # logger.info("Request execution time", extra={
+    #     "process_time": round(process_time, 4)
+    # })
     return response
 
+instrumentator = Instrumentator(
+    should_group_status_codes=False,
+    excluded_handlers=[".*admin.*", "/metrics"],
+)
 
-
+Instrumentator().instrument(app).expose(app)

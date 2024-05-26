@@ -48,7 +48,7 @@ async def import_data_from_csv(
                             .values(
                                 name=row[1],
                                 location=row[2],
-                                services=row[3],
+                                services=row[3][1:-1].split(","),
                                 rooms_quantity=int(row[4]),
                                 image_id=int(row[5])
                             )
